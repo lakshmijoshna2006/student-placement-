@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile & Resume | Student Placement System{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Student Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-role-badge"><i class="bi bi-person-badge me-1"></i> Student Candidate</span>
+            <h6 class="text-white fw-bold mb-0 mt-2">{{ student.name }}</h6>
+            <small class="text-secondary">{{ student.roll_no }} &bull; {{ student.department }}</small>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.dashboard') }}" class="sidebar-link">
+                    <i class="bi bi-speedometer2"></i> My Dashboard
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.profile') }}" class="sidebar-link active">
+                    <i class="bi bi-person-vcard"></i> Profile &amp; Resume
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('jobs.index') }}" class="sidebar-link">
+                    <i class="bi bi-briefcase"></i> Explore Job Drives
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.applications') }}" class="sidebar-link">
+                    <i class="bi bi-send-check"></i> My Applications
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.trainings') }}" class="sidebar-link">
+                    <i class="bi bi-journal-code"></i> My Trainings
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('placements.index') }}" class="sidebar-link">
+                    <i class="bi bi-trophy"></i> Placement Records
+                </a>
+            </li>
+            <li class="sidebar-item mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1">Student Academic Profile &amp; Resume</h3>
+            <p class="text-muted small mb-0">Maintain accurate academic scores, technical competencies, and your PDF resume for recruiter screening.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('student.profile') }}" enctype="multipart/form-data">
+            <div class="row g-4">
+                <!-- Personal & Academic Details -->
+                <div class="col-lg-8">
+                    <div class="custom-card p-4">
+                        <h5 class="fw-bold mb-3 border-bottom pb-2">
+                            <i class="bi bi-mortarboard-fill text-primary me-2"></i> Academic Information
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" value="{{ student.name }}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">University Roll Number</label>
+                                <input type="text" class="form-control bg-light" value="{{ student.roll_no }}" readonly>
+                                <small class="text-muted">Unique identifier registered by college.</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Official Email</label>
+                                <input type="email" class="form-control bg-light" value="{{ student.email }}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="tel" class="form-control" name="phone" value="{{ student.phone if student.phone else '' }}" placeholder="+91 98765 43210">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Department / Branch <span class="text-danger">*</span></label>
+                                <select name="department" class="form-select" required>
+                                    {% for d in departments %}
+                                        <option value="{{ d }}" {% if student.department == d %}selected{% endif %}>{{ d }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Cumulative CGPA (0-10) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" max="10" class="form-control" name="cgpa" value="{{ student.cgpa }}" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Active Backlogs <span class="text-danger">*</span></label>
+                                <input type="number" min="0" max="20" class="form-control" name="backlogs" value="{{ student.backlogs }}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Graduation Year</label>
+                                <input type="text" class="form-control" name="passing_year" value="{{ student.passing_year if student.passing_year else '2026' }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Placement Eligibility Status</label>
+                                <input type="text" class="form-control bg-light fw-bold {% if student.status == 'Placed' %}text-success{% else %}text-primary{% endif %}" value="{{ student.status }}" readonly>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Key Technical Skills (Comma-separated)</label>
+                                <input type="text" class="form-control" name="skills" value="{{ student.skills|join(', ') if student.skills is iterable and student.skills is not string else student.skills }}" placeholder="e.g. Python, Java, React, SQL, AWS, Docker">
+                                <small class="text-muted">These keywords are indexed for recruiter skill searching.</small>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Professional Bio / Summary</label>
+                                <textarea name="bio" class="form-control" rows="3" placeholder="Brief statement regarding your career interests, key project highlights, and aspirations...">{{ student.bio if student.bio else '' }}</textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">LinkedIn Profile URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-linkedin text-primary"></i></span>
+                                    <input type="url" class="form-control" name="linkedin" value="{{ student.linkedin if student.linkedin else '' }}" placeholder="https://linkedin.com/in/username">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">GitHub Profile URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-github"></i></span>
+                                    <input type="url" class="form-control" name="github" value="{{ student.github if student.github else '' }}" placeholder="https://github.com/username">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top text-end">
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="bi bi-save me-1"></i> Update Profile Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDF Resume Upload Card -->
+                <div class="col-lg-4">
+                    <div class="custom-card p-4">
+                        <h5 class="fw-bold mb-3 border-bottom pb-2">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i> PDF Resume Document
+                        </h5>
+
+                        <div class="mb-3 text-center p-3 rounded-3 bg-light border">
+                            {% if student.resume_filename %}
+                                <i class="bi bi-file-earmark-check-fill text-success fs-1 mb-2 d-block"></i>
+                                <span class="badge bg-success mb-2">Resume Uploaded &amp; Active</span>
+                                <p class="small text-muted mb-3">{{ student.resume_filename }}</p>
+                                <a href="{{ url_for('student.download_resume', filename=student.resume_filename) }}" target="_blank" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="bi bi-eye-fill me-1"></i> View / Download Current PDF
+                                </a>
+                            {% else %}
+                                <i class="bi bi-file-earmark-x-fill text-danger fs-1 mb-2 d-block"></i>
+                                <span class="badge bg-danger mb-2">No Resume Uploaded</span>
+                                <p class="small text-danger mb-0">You cannot apply for any job drives until you upload your PDF resume.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Upload New Resume (PDF only, max 10MB)</label>
+                            <input type="file" class="form-control" id="resume" name="resume" accept="application/pdf">
+                            <small class="text-muted d-block mt-1">Allowed extension: <strong>.pdf</strong></small>
+                        </div>
+
+                        <button type="submit" class="btn btn-outline-primary w-100 fw-semibold">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload &amp; Save Resume
+                        </button>
+                    </div>
+
+                    <!-- Placement Checklist Card -->
+                    <div class="custom-card p-4 mt-4">
+                        <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-card-checklist text-primary me-2"></i> Drive Readiness Checklist</h6>
+                        <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                            <li>
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                Academic profile completed
+                            </li>
+                            <li>
+                                {% if student.resume_filename %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Verified PDF resume uploaded
+                                {% else %}
+                                    <i class="bi bi-x-circle-fill text-danger me-2"></i> Upload PDF resume
+                                {% endif %}
+                            </li>
+                            <li>
+                                {% if student.cgpa >= 7.0 %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> CGPA >= 7.0 (Eligible for Tier-1)
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill text-warning me-2"></i> CGPA is {{ student.cgpa }}
+                                {% endif %}
+                            </li>
+                            <li>
+                                {% if student.backlogs == 0 %}
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Zero active backlogs
+                                {% else %}
+                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> {{ student.backlogs }} standing backlogs
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

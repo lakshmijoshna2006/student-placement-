@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Reports &amp; Analytics | Placement Admin{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Admin Sidebar Navigation -->
+    <aside class="dashboard-sidebar d-print-none">
+        <div class="sidebar-header">
+            <span class="sidebar-role-badge"><i class="bi bi-shield-check me-1"></i> Placement Admin</span>
+            <h6 class="text-white fw-bold mb-0 mt-2">{{ session_name }}</h6>
+            <small class="text-secondary">{{ session_email }}</small>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item"><a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><i class="bi bi-speedometer2"></i> Dashboard Overview</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('admin.students') }}" class="sidebar-link"><i class="bi bi-people"></i> Manage Students</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('admin.companies') }}" class="sidebar-link"><i class="bi bi-buildings"></i> Manage Companies</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('jobs.index') }}" class="sidebar-link"><i class="bi bi-briefcase"></i> Job Opportunities</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('admin.applications') }}" class="sidebar-link"><i class="bi bi-folder-check"></i> Student Applications</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('training.index') }}" class="sidebar-link"><i class="bi bi-journal-code"></i> Training Programs</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('placements.index') }}" class="sidebar-link"><i class="bi bi-trophy"></i> Placement Records</a></li>
+            <li class="sidebar-item"><a href="{{ url_for('admin.reports') }}" class="sidebar-link active"><i class="bi bi-graph-up"></i> Reports &amp; Analytics</a></li>
+            <li class="sidebar-item mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">Placement Analytics &amp; Statistical Reports</h3>
+                <p class="text-muted small mb-0">Comprehensive institutional reports on department performance, corporate recruit distribution, and salary benchmarks.</p>
+            </div>
+            <button type="button" class="btn btn-outline-primary d-print-none" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print / Save Report
+            </button>
+        </div>
+
+        <!-- KPI Metric Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-sm-6">
+                <div class="stat-card">
+                    <span class="stat-label">Placement Success Rate</span>
+                    <div class="stat-value text-primary">{{ placement_rate }}%</div>
+                    <div class="small text-muted mt-2">{{ total_placed }} out of {{ total_students }} Placed</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+                <div class="stat-card">
+                    <span class="stat-label">Highest Package</span>
+                    <div class="stat-value text-success">{{ highest_package }} LPA</div>
+                    <div class="small text-muted mt-2">Product Super Dream Offer</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+                <div class="stat-card">
+                    <span class="stat-label">Average CTC</span>
+                    <div class="stat-value text-dark">{{ avg_package }} LPA</div>
+                    <div class="small text-muted mt-2">Institutional Mean</div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+                <div class="stat-card">
+                    <span class="stat-label">Median CTC</span>
+                    <div class="stat-value text-info">{{ median_package }} LPA</div>
+                    <div class="small text-muted mt-2">50th Percentile Benchmark</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual Analytics Row -->
+        <div class="row g-4 mb-4">
+            <!-- Department Comparison Bar Chart -->
+            <div class="col-lg-7">
+                <div class="custom-card p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-bar-chart-line-fill text-primary me-2"></i> Department-Wise Placement Rate (%)
+                    </h5>
+                    <div style="height: 280px;">
+                        <canvas id="deptRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salary Bracket Distribution Doughnut Chart -->
+            <div class="col-lg-5">
+                <div class="custom-card p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="bi bi-pie-chart-fill text-warning me-2"></i> Salary Tier Distribution
+                    </h5>
+                    <div style="height: 280px;" class="d-flex justify-content-center align-items-center">
+                        <canvas id="tierChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Department Statistics Table -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header">
+                <h5 class="custom-card-title">
+                    <i class="bi bi-table me-2 text-primary"></i> Departmental Academic Year Placement Performance
+                </h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Department / Branch</th>
+                            <th>Total Students</th>
+                            <th>Placed Candidates</th>
+                            <th>Unplaced</th>
+                            <th>Placement Rate</th>
+                            <th class="text-end">Average CTC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in dept_stats %}
+                            <tr>
+                                <td class="fw-bold">{{ d.department }}</td>
+                                <td>{{ d.total }}</td>
+                                <td><span class="badge bg-success-subtle text-success">{{ d.placed }}</span></td>
+                                <td><span class="badge bg-light text-muted border">{{ d.unplaced }}</span></td>
+                                <td style="width: 250px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ d.rate }}%;" aria-valuenow="{{ d.rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="small fw-bold">{{ d.rate }}%</span>
+                                    </div>
+                                </td>
+                                <td class="text-end fw-bold">{{ d.avg_package }} LPA</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top Hiring Companies Table -->
+        <div class="custom-card">
+            <div class="custom-card-header">
+                <h5 class="custom-card-title">
+                    <i class="bi bi-buildings-fill me-2 text-primary"></i> Top Corporate Hiring Partners
+                </h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Company Name</th>
+                            <th>Total Campus Hires</th>
+                            <th>Average Package Extended</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if company_stats %}
+                            {% for c in company_stats %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td class="fw-bold text-primary">{{ c.company_name }}</td>
+                                    <td><span class="package-badge">{{ c.hires }} Offers</span></td>
+                                    <td><strong>{{ c.avg_package }} LPA</strong></td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No corporate hire records available.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Department Placement Rate Chart
+    const deptLabels = {{ dept_stats|map(attribute='department')|list|tojson }};
+    const deptRates = {{ dept_stats|map(attribute='rate')|list|tojson }};
+
+    const rateCtx = document.getElementById('deptRateChart').getContext('2d');
+    new Chart(rateCtx, {
+        type: 'bar',
+        data: {
+            labels: deptLabels,
+            datasets: [{
+                label: 'Placement %',
+                data: deptRates,
+                backgroundColor: '#1d4ed8',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(val) { return val + '%'; }
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // 2. Salary Tier Distribution Doughnut Chart
+    const tierCtx = document.getElementById('tierChart').getContext('2d');
+    new Chart(tierCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Super Dream (>=12 LPA)', 'Dream (6-12 LPA)', 'Regular (<6 LPA)'],
+            datasets: [{
+                data: [{{ tier_super_dream }}, {{ tier_dream }}, {{ tier_regular }}],
+                backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

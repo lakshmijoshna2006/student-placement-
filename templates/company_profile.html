@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Company Profile | Recruiter Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Company Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-role-badge"><i class="bi bi-building me-1"></i> Corporate Recruiter</span>
+            <h6 class="text-white fw-bold mb-0 mt-2">{{ company.company_name }}</h6>
+            <small class="text-secondary">{{ company.email }}</small>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.dashboard') }}" class="sidebar-link">
+                    <i class="bi bi-speedometer2"></i> Recruiter Dashboard
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.profile') }}" class="sidebar-link active">
+                    <i class="bi bi-building-gear"></i> Company Profile
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('jobs.create') }}" class="sidebar-link">
+                    <i class="bi bi-plus-circle"></i> Post Job Opening
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.applications') }}" class="sidebar-link">
+                    <i class="bi bi-people"></i> Manage Applications
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.history') }}" class="sidebar-link">
+                    <i class="bi bi-clock-history"></i> Recruitment History
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('jobs.index') }}" class="sidebar-link">
+                    <i class="bi bi-briefcase"></i> View All Drives
+                </a>
+            </li>
+            <li class="sidebar-item mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1">Corporate Profile Management</h3>
+            <p class="text-muted small mb-0">Update corporate branding, contact coordinator details, and organization overview visible to candidates.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="custom-card p-4">
+                    <form method="POST" action="{{ url_for('company.profile') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="company_name" value="{{ company.company_name }}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Corporate Email</label>
+                                <input type="email" class="form-control bg-light" value="{{ company.email }}" readonly>
+                                <small class="text-muted">Managed via secure login identity.</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">HR / Contact Person Name</label>
+                                <input type="text" class="form-control" name="contact_person" value="{{ company.contact_person if company.contact_person else '' }}" placeholder="Lead Campus Recruiter">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Official Phone Number</label>
+                                <input type="tel" class="form-control" name="phone" value="{{ company.phone if company.phone else '' }}" placeholder="+91 98450 12345">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Industry Domain</label>
+                                <input type="text" class="form-control" name="industry" value="{{ company.industry if company.industry else 'Software & Cloud' }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Official Website URL</label>
+                                <input type="url" class="form-control" name="website" value="{{ company.website if company.website else '' }}" placeholder="https://company.com">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Primary Office Locations</label>
+                                <input type="text" class="form-control" name="location" value="{{ company.location if company.location else '' }}" placeholder="e.g. Bangalore, Hyderabad, Pune">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Company Overview</label>
+                                <textarea name="description" class="form-control" rows="4" placeholder="Brief introduction to your products, engineering culture, and campus talent expectations...">{{ company.description if company.description else '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top text-end">
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="bi bi-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="custom-card p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-patch-check-fill text-success me-2"></i> Partner Verification</h6>
+                    <div class="p-3 bg-light rounded-3 mb-3">
+                        <span class="badge bg-success mb-2">Verified Recruiter</span>
+                        <p class="small text-muted mb-0">Your corporate profile is fully verified by the central T&amp;P office for campus drives.</p>
+                    </div>
+
+                    <h6 class="fw-bold text-dark mb-2">Recruitment Guidelines</h6>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-2">Specify explicit CGPA cutoffs and allowed departments for automated shortlisting.</li>
+                        <li class="mb-2">Verify that candidate resumes are in standard PDF format.</li>
+                        <li>Update application statuses promptly to keep candidates informed.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

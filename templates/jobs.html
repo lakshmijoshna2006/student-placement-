@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Job Drives &amp; Openings | Placement System{% endblock %}
+
+{% block content %}
+<div class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">Campus Recruitment Drives</h3>
+                <p class="text-muted small mb-0">Browse active full-time and internship opportunities posted by verified recruiting partners.</p>
+            </div>
+            {% if session_role in ['admin', 'company'] %}
+                <div>
+                    <a href="{{ url_for('jobs.create') }}" class="btn btn-primary fw-bold">
+                        <i class="bi bi-plus-circle me-1"></i> Post New Job Drive
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Filters Bar -->
+    <div class="custom-card p-3 mb-4">
+        <form method="GET" action="{{ url_for('jobs.index') }}" class="row g-2 align-items-center">
+            <div class="col-lg-4 col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="q" value="{{ search_q }}" placeholder="Search title, company, skills...">
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <select name="dept" class="form-select">
+                    <option value="All" {% if not dept_filter or dept_filter == 'All' %}selected{% endif %}>All Departments</option>
+                    {% for d in departments %}
+                        <option value="{{ d }}" {% if dept_filter == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <select name="type" class="form-select">
+                    <option value="All" {% if not type_filter or type_filter == 'All' %}selected{% endif %}>All Types</option>
+                    <option value="Full-time" {% if type_filter == 'Full-time' %}selected{% endif %}>Full-time</option>
+                    <option value="Internship" {% if type_filter == 'Internship' %}selected{% endif %}>Internship</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <select name="min_pkg" class="form-select">
+                    <option value="" {% if not min_pkg_filter %}selected{% endif %}>Any Package</option>
+                    <option value="5" {% if min_pkg_filter == '5' %}selected{% endif %}>5+ LPA</option>
+                    <option value="8" {% if min_pkg_filter == '8' %}selected{% endif %}>8+ LPA</option>
+                    <option value="12" {% if min_pkg_filter == '12' %}selected{% endif %}>12+ LPA</option>
+                    <option value="15" {% if min_pkg_filter == '15' %}selected{% endif %}>15+ LPA</option>
+                </select>
+            </div>
+
+            <div class="col-lg-1 col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100" title="Apply Filters">Filter</button>
+                {% if search_q or (dept_filter and dept_filter != 'All') or (type_filter and type_filter != 'All') or min_pkg_filter %}
+                    <a href="{{ url_for('jobs.index') }}" class="btn btn-light border" title="Reset Filters"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Jobs Grid -->
+    <div class="row g-4">
+        {% if jobs %}
+            {% for job in jobs %}
+                <div class="col-lg-6">
+                    <div class="job-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <span class="badge bg-light text-dark border mb-1">{{ job.company_name }}</span>
+                                <h5 class="fw-bold text-primary mb-1">
+                                    <a href="{{ url_for('jobs.details', job_id=job._id) }}" class="text-decoration-none text-dark">{{ job.title }}</a>
+                                </h5>
+                                <div class="text-muted small">
+                                    <i class="bi bi-geo-alt me-1"></i> {{ job.location }} &bull; 
+                                    <span class="badge bg-light text-dark border">{{ job.job_type }}</span>
+                                </div>
+                            </div>
+                            <span class="package-badge fs-6">{{ job.salary_package }} LPA</span>
+                        </div>
+
+                        <p class="text-secondary small mb-3 text-truncate-2">
+                            {{ job.description }}
+                        </p>
+
+                        <!-- Skills -->
+                        <div class="mb-3">
+                            {% for skill in job.skills_required[:4] %}
+                                <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                            {% if job.skills_required|length > 4 %}
+                                <span class="skill-tag text-muted">+{{ job.skills_required|length - 4 }} more</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Eligibility Summary -->
+                        <div class="p-2 bg-light rounded-2 small text-muted mb-3 d-flex flex-wrap justify-content-between gap-1">
+                            <span><i class="bi bi-mortarboard me-1"></i> Min CGPA: <strong>{{ job.min_cgpa }}</strong></span>
+                            <span><i class="bi bi-exclamation-triangle me-1"></i> Max Backlogs: <strong>{{ job.max_backlogs }}</strong></span>
+                            <span><i class="bi bi-calendar-event me-1"></i> Deadline: <strong>{{ job.deadline }}</strong></span>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <!-- Student Eligibility Indicator -->
+                            {% if session_role == 'student' %}
+                                {% if job.is_applied %}
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle py-1 px-2">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Application Submitted
+                                    </span>
+                                {% elif job.is_eligible %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">
+                                        <i class="bi bi-patch-check-fill me-1"></i> You are Eligible
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2">
+                                        <i class="bi bi-x-circle me-1"></i> Criteria Not Met
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted small">
+                                    <i class="bi bi-people me-1"></i> <strong>{{ job.applicant_count }}</strong> Applicants
+                                </span>
+                            {% endif %}
+
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('jobs.details', job_id=job._id) }}" class="btn btn-sm btn-primary">
+                                    View Details &amp; Apply
+                                </a>
+
+                                <!-- Admin / Owner Edit Actions -->
+                                {% if session_role == 'admin' %}
+                                    <a href="{{ url_for('jobs.edit', job_id=job._id) }}" class="btn btn-sm btn-light border text-primary" title="Edit Opening">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-briefcase fs-1 text-muted d-block mb-3"></i>
+                <h5 class="fw-bold">No Job Drives Found</h5>
+                <p class="text-muted">There are no job drives matching your search and filter criteria.</p>
+                <a href="{{ url_for('jobs.index') }}" class="btn btn-outline-primary">Reset Filters</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

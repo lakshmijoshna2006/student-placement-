@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Placement Records &amp; Hall of Fame | Placement System{% endblock %}
+
+{% block content %}
+<!-- Top Header Banner -->
+<div class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">Campus Placement Records &amp; Hall of Fame</h3>
+                <p class="text-muted small mb-0">Celebrating the success of our students placed across premier multinational corporations and technology innovators.</p>
+            </div>
+            {% if session_role == 'admin' %}
+                <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#recordPlacementModal">
+                    <i class="bi bi-award-fill me-1"></i> Record Placement Offer
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Key Statistics Highlights Banner -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="p-3 bg-white rounded-3 border shadow-sm d-flex align-items-center gap-3">
+                <div class="stat-icon emerald"><i class="bi bi-trophy-fill"></i></div>
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Total Placed Students</span>
+                    <h3 class="fw-bold mb-0 text-success">{{ total_placed }} Offers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 bg-white rounded-3 border shadow-sm d-flex align-items-center gap-3">
+                <div class="stat-icon blue"><i class="bi bi-award-fill"></i></div>
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Highest CTC Package</span>
+                    <h3 class="fw-bold mb-0 text-primary">{{ highest_pkg }} LPA</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 bg-white rounded-3 border shadow-sm d-flex align-items-center gap-3">
+                <div class="stat-icon amber"><i class="bi bi-graph-up-arrow"></i></div>
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Average CTC Package</span>
+                    <h3 class="fw-bold mb-0 text-dark">{{ avg_pkg }} LPA</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="custom-card p-3 mb-4">
+        <form method="GET" action="{{ url_for('placements.index') }}" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="q" value="{{ search_q }}" placeholder="Search by student name, roll number, or company...">
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <select name="dept" class="form-select">
+                    <option value="All" {% if not dept_filter or dept_filter == 'All' %}selected{% endif %}>All Departments</option>
+                    {% for d in departments %}
+                        <option value="{{ d }}" {% if dept_filter == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="year" class="form-select">
+                    <option value="All" {% if not year_filter or year_filter == 'All' %}selected{% endif %}>All Academic Years</option>
+                    <option value="2025-2026" {% if year_filter == '2025-2026' %}selected{% endif %}>2025-2026</option>
+                    <option value="2024-2025" {% if year_filter == '2024-2025' %}selected{% endif %}>2024-2025</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                {% if search_q or (dept_filter and dept_filter != 'All') or (year_filter and year_filter != 'All') %}
+                    <a href="{{ url_for('placements.index') }}" class="btn btn-light border" title="Reset Filters"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Placements Table -->
+    <div class="custom-card">
+        <div class="custom-card-header">
+            <h5 class="custom-card-title">
+                <i class="bi bi-stars text-warning me-2"></i> Verified Placement Offers ({{ placements|length }})
+            </h5>
+            <div class="input-group input-group-sm" style="max-width: 250px;">
+                <span class="input-group-text bg-light"><i class="bi bi-funnel"></i></span>
+                <input type="text" id="tableLiveSearch" class="form-control" placeholder="Search table...">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom table-filterable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Candidate</th>
+                        <th>Roll Number</th>
+                        <th>Branch</th>
+                        <th>Hiring Organization</th>
+                        <th>Job Designation</th>
+                        <th>Offered Package</th>
+                        <th>Academic Batch</th>
+                        {% if session_role == 'admin' %}
+                            <th class="text-end">Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if placements %}
+                        {% for p in placements %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ p.student_name }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ p.roll_no }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary">{{ p.department }}</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-primary">{{ p.company_name }}</div>
+                                </td>
+                                <td>
+                                    {{ p.job_title }}
+                                </td>
+                                <td>
+                                    <span class="package-badge fs-6">{{ p.package }} LPA</span>
+                                </td>
+                                <td>
+                                    <span class="small text-muted">{{ p.academic_year }}</span>
+                                </td>
+                                {% if session_role == 'admin' %}
+                                    <td class="text-end">
+                                        <form method="POST" action="{{ url_for('placements.delete', placement_id=p._id) }}" class="d-inline" onsubmit="return confirm('Delete placement record for {{ p.student_name }}?');">
+                                            <button type="submit" class="btn btn-sm btn-light border text-danger" title="Remove Record">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">No placement records found matching criteria.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Record Placement Modal (Admin Only) -->
+{% if session_role == 'admin' %}
+<div class="modal fade" id="recordPlacementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('placements.create') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-award-fill text-warning me-2"></i> Record Official Placement Offer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Student Candidate <span class="text-danger">*</span></label>
+                        <select name="student_id" class="form-select" required>
+                            <option value="">-- Choose Student --</option>
+                            {% for st in students %}
+                                <option value="{{ st._id }}">{{ st.name }} ({{ st.roll_no }} - {{ st.department }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Recruiting Company <span class="text-danger">*</span></label>
+                        <select name="company_id" class="form-select" required>
+                            <option value="">-- Choose Company --</option>
+                            {% for c in companies %}
+                                <option value="{{ c._id }}">{{ c.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Offered Job Designation <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="job_title" placeholder="e.g. Software Engineer (L3)" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">CTC Package (LPA) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" min="0" class="form-control" name="package" placeholder="e.g. 12.5" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Academic Batch Year</label>
+                            <input type="text" class="form-control" name="academic_year" value="2025-2026">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Save Placement Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

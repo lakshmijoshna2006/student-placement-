@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} at {{ job.company_name }} | Placement Portal{% endblock %}
+
+{% block content %}
+<!-- Top Header Banner -->
+<div class="py-4 border-bottom bg-white">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('jobs.index') }}" class="text-decoration-none">Job Drives</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ job.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <span class="badge bg-light text-dark border mb-2">{{ job.company_name }}</span>
+                <h2 class="fw-bold mb-1">{{ job.title }}</h2>
+                <div class="text-muted small d-flex flex-wrap gap-3">
+                    <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ job.location }}</span>
+                    <span><i class="bi bi-briefcase-fill text-primary me-1"></i> {{ job.job_type }}</span>
+                    <span><i class="bi bi-clock-fill text-warning me-1"></i> Deadline: <strong>{{ job.deadline }}</strong></span>
+                </div>
+            </div>
+
+            <div class="text-md-end">
+                <span class="package-badge fs-5 px-3 py-2 d-inline-block">{{ job.salary_package }} LPA</span>
+                <div class="small text-muted mt-1">{{ job.applicant_count }} Candidates Applied</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Main Job Info Column -->
+        <div class="col-lg-8">
+            <!-- Job Description Card -->
+            <div class="custom-card p-4 mb-4">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-file-text-fill text-primary me-2"></i> Role Description &amp; Responsibilities
+                </h5>
+                <p class="text-secondary" style="line-height: 1.7; white-space: pre-line;">{{ job.description }}</p>
+
+                <!-- Required Skills -->
+                <h6 class="fw-bold mt-4 mb-2">Required Skills &amp; Competencies</h6>
+                <div>
+                    {% for skill in job.skills_required %}
+                        <span class="skill-tag fs-6 px-3 py-1">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Eligibility & Qualification Requirements -->
+            <div class="custom-card p-4 mb-4">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-shield-check text-success me-2"></i> Eligibility Criteria &amp; Guidelines
+                </h5>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Minimum CGPA</span>
+                            <span class="fs-4 fw-extrabold text-primary">{{ job.min_cgpa }}</span>
+                            <small class="text-muted d-block">Cutoff on 10.0 scale</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Active Backlogs Allowed</span>
+                            <span class="fs-4 fw-extrabold text-danger">{{ job.max_backlogs }}</span>
+                            <small class="text-muted d-block">Maximum permitted</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small text-uppercase fw-bold d-block">Eligible Branches</span>
+                            <span class="fw-bold text-dark d-block text-truncate">
+                                {{ job.departments|join(', ') if job.departments is iterable and job.departments is not string else job.departments }}
+                            </span>
+                            <small class="text-muted d-block">Engineering departments</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Hiring Organization -->
+            {% if company %}
+                <div class="custom-card p-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">
+                        <i class="bi bi-building me-2 text-primary"></i> About {{ company.company_name }}
+                    </h5>
+                    <p class="text-secondary small mb-3">{{ company.description }}</p>
+                    <div class="row g-2 small text-muted">
+                        <div class="col-sm-6"><i class="bi bi-tag me-1"></i> Industry: <strong>{{ company.industry }}</strong></div>
+                        {% if company.website %}
+                            <div class="col-sm-6"><i class="bi bi-globe me-1"></i> Website: <a href="{{ company.website }}" target="_blank">{{ company.website }}</a></div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Action Sidebar (Eligibility & Apply) -->
+        <div class="col-lg-4">
+            <!-- Application Box -->
+            <div class="custom-card p-4 sticky-top" style="top: 90px;">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Application Center</h5>
+
+                {% if session_role == 'student' %}
+                    <!-- If Student is logged in -->
+                    {% if application %}
+                        <!-- Already Applied -->
+                        <div class="alert alert-info border-info mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-check-circle-fill fs-4 text-info"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Application Submitted</h6>
+                                    <small class="text-muted">Applied on {{ application.applied_date.strftime('%d %b %Y') if application.applied_date else 'Recently' }}</small>
+                                </div>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small fw-semibold">Current Status:</span>
+                                {% if application.status == 'Selected' %}
+                                    <span class="badge-status badge-status-selected">Selected</span>
+                                {% elif application.status == 'Shortlisted' %}
+                                    <span class="badge-status badge-status-shortlisted">Shortlisted</span>
+                                {% elif application.status == 'Interview Scheduled' %}
+                                    <span class="badge-status badge-status-interview">Interview Scheduled</span>
+                                {% elif application.status == 'Rejected' %}
+                                    <span class="badge-status badge-status-rejected">Rejected</span>
+                                {% else %}
+                                    <span class="badge-status badge-status-applied">Applied</span>
+                                {% endif %}
+                            </div>
+                            {% if application.remarks %}
+                                <div class="mt-2 p-2 bg-white rounded small text-secondary">
+                                    <strong>Remarks:</strong> {{ application.remarks }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    {% else %}
+                        <!-- Not Yet Applied: Check Eligibility Checklist -->
+                        <div class="mb-3">
+                            <span class="small fw-bold text-uppercase text-muted d-block mb-2">Your Eligibility Status</span>
+                            
+                            <ul class="list-unstyled small d-flex flex-column gap-2 mb-3">
+                                <li class="d-flex align-items-center justify-content-between p-2 rounded {% if eligibility.cgpa_ok %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                                    <span><i class="bi {% if eligibility.cgpa_ok %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-2"></i> CGPA Criteria (Min {{ job.min_cgpa }})</span>
+                                    <strong>{{ student.cgpa }}</strong>
+                                </li>
+                                <li class="d-flex align-items-center justify-content-between p-2 rounded {% if eligibility.backlogs_ok %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                                    <span><i class="bi {% if eligibility.backlogs_ok %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-2"></i> Backlog Criteria (Max {{ job.max_backlogs }})</span>
+                                    <strong>{{ student.backlogs }}</strong>
+                                </li>
+                                <li class="d-flex align-items-center justify-content-between p-2 rounded {% if eligibility.dept_ok %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                                    <span><i class="bi {% if eligibility.dept_ok %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-2"></i> Branch Eligible</span>
+                                    <strong>{{ student.department }}</strong>
+                                </li>
+                                <li class="d-flex align-items-center justify-content-between p-2 rounded {% if eligibility.resume_ok %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %}">
+                                    <span><i class="bi {% if eligibility.resume_ok %}bi-check-circle-fill{% else %}bi-x-circle-fill{% endif %} me-2"></i> PDF Resume Uploaded</span>
+                                    <strong>{% if eligibility.resume_ok %}Yes{% else %}Missing{% endif %}</strong>
+                                </li>
+                            </ul>
+
+                            {% if eligibility.is_eligible %}
+                                <div class="alert alert-success small mb-3">
+                                    <i class="bi bi-patch-check-fill me-1"></i> You satisfy all academic &amp; document requirements.
+                                </div>
+
+                                <!-- Apply Trigger Button (Opens Confirmation Modal) -->
+                                <button type="button" class="btn btn-primary w-100 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#confirmApplyModal">
+                                    <i class="bi bi-send-check me-2"></i> Apply for this Drive
+                                </button>
+
+                                <!-- Confirmation Modal -->
+                                <div class="modal fade" id="confirmApplyModal" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ url_for('jobs.apply', job_id=job._id) }}">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold">Confirm Application Submission</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to apply for <strong>{{ job.title }}</strong> at <strong>{{ job.company_name }}</strong>?</p>
+                                                    <div class="p-3 bg-light rounded small text-secondary">
+                                                        <div>Candidate: <strong>{{ student.name }} ({{ student.roll_no }})</strong></div>
+                                                        <div>Department: <strong>{{ student.department }}</strong> | CGPA: <strong>{{ student.cgpa }}</strong></div>
+                                                        <div>Verified Resume: <strong>{{ student.resume_filename }}</strong></div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary fw-bold">Submit Application</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% else %}
+                                <div class="alert alert-danger small mb-3">
+                                    <strong>Application Restricted:</strong>
+                                    <ul class="ps-3 mb-0 mt-1">
+                                        {% for reason in eligibility.reasons %}
+                                            <li>{{ reason }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                {% if not eligibility.resume_ok %}
+                                    <a href="{{ url_for('student.profile') }}" class="btn btn-danger w-100 fw-bold">
+                                        <i class="bi bi-upload me-1"></i> Upload Resume to Enable
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-secondary w-100" disabled>Ineligible to Apply</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                {% elif session_role == 'company' or session_role == 'admin' %}
+                    <!-- Company or Admin View -->
+                    <div class="alert alert-light border small text-muted mb-3">
+                        You are viewing this job drive as a <strong>{{ session_role|capitalize }}</strong>.
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="{{ url_for('jobs.edit', job_id=job._id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i> Edit Opening Details
+                        </a>
+                        {% if session_role == 'company' %}
+                            <a href="{{ url_for('company.applications', job_id=job._id) }}" class="btn btn-primary">
+                                <i class="bi bi-people me-1"></i> Review Applicants ({{ job.applicant_count }})
+                            </a>
+                        {% elif session_role == 'admin' %}
+                            <a href="{{ url_for('admin.applications') }}" class="btn btn-primary">
+                                <i class="bi bi-people me-1"></i> Review All Applications
+                            </a>
+                        {% endif %}
+                    </div>
+
+                {% else %}
+                    <!-- Guest View -->
+                    <div class="p-3 bg-light rounded text-center mb-3">
+                        <p class="small text-muted mb-2">Please sign in as a student to evaluate eligibility and submit your application.</p>
+                        <a href="{{ url_for('auth.login', role='student') }}" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Student Login to Apply
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

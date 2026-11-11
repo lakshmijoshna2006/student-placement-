@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Training Programs &amp; Bootcamps | Placement Portal{% endblock %}
+
+{% block content %}
+<div class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">Pre-Placement Skill &amp; Training Programs</h3>
+                <p class="text-muted small mb-0">Intensive technical bootcamps, coding masterclasses, cloud architecture labs, and behavioral mock interviews.</p>
+            </div>
+            {% if session_role == 'admin' %}
+                <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#createTrainingModal">
+                    <i class="bi bi-plus-circle me-1"></i> Schedule New Training
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Filter Controls -->
+    <div class="custom-card p-3 mb-4">
+        <form method="GET" action="{{ url_for('training.index') }}" class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex gap-2 align-items-center">
+                <span class="small fw-bold text-muted text-uppercase">Status Filter:</span>
+                <a href="{{ url_for('training.index') }}" class="btn btn-sm {% if not status_filter or status_filter == 'All' %}btn-primary{% else %}btn-light border{% endif %}">All</a>
+                <a href="{{ url_for('training.index', status='Upcoming') }}" class="btn btn-sm {% if status_filter == 'Upcoming' %}btn-primary{% else %}btn-light border{% endif %}">Upcoming</a>
+                <a href="{{ url_for('training.index', status='Ongoing') }}" class="btn btn-sm {% if status_filter == 'Ongoing' %}btn-primary{% else %}btn-light border{% endif %}">Ongoing</a>
+                <a href="{{ url_for('training.index', status='Completed') }}" class="btn btn-sm {% if status_filter == 'Completed' %}btn-primary{% else %}btn-light border{% endif %}">Completed</a>
+            </div>
+
+            <span class="small text-muted">{{ trainings|length }} Training Bootcamps Scheduled</span>
+        </form>
+    </div>
+
+    <!-- Trainings Grid -->
+    <div class="row g-4">
+        {% if trainings %}
+            {% for t in trainings %}
+                <div class="col-lg-6">
+                    <div class="custom-card p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary mb-1">{{ t.mode }}</span>
+                                    <h5 class="fw-bold text-dark mb-1">{{ t.title }}</h5>
+                                </div>
+                                <span class="badge {% if t.status == 'Upcoming' %}bg-warning text-dark{% elif t.status == 'Ongoing' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ t.status }}
+                                </span>
+                            </div>
+
+                            <p class="text-primary small fw-semibold mb-2">
+                                <i class="bi bi-person-workspace me-1"></i> Trainer: {{ t.trainer_name }}
+                            </p>
+
+                            <p class="text-secondary small mb-3">
+                                {{ t.description }}
+                            </p>
+
+                            <div class="p-3 bg-light rounded-3 small text-muted mb-3">
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <i class="bi bi-calendar-range text-primary me-1"></i> <strong>{{ t.start_date }}</strong> to <strong>{{ t.end_date }}</strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <i class="bi bi-geo-alt text-danger me-1"></i> Venue: <strong>{{ t.venue if t.venue else 'Online Portal' }}</strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <i class="bi bi-person-check text-success me-1"></i> Target: <strong>{{ t.eligibility }}</strong>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <i class="bi bi-people text-info me-1"></i> Enrolled: <strong>{{ t.reg_count }} / {{ t.max_seats }} Seats</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer Actions -->
+                        <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                            {% if session_role == 'student' %}
+                                {% if t.is_registered %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Enrolled in Program
+                                    </span>
+                                    <form method="POST" action="{{ url_for('student.cancel_training', training_id=t._id) }}" onsubmit="return confirm('Cancel registration for this training?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel Registration</button>
+                                    </form>
+                                {% else %}
+                                    {% if t.reg_count >= t.max_seats %}
+                                        <span class="badge bg-secondary">Seats Full</span>
+                                    {% else %}
+                                        <span class="text-muted small">{{ t.max_seats - t.reg_count }} seats remaining</span>
+                                        <form method="POST" action="{{ url_for('student.register_training', training_id=t._id) }}">
+                                            <button type="submit" class="btn btn-sm btn-primary fw-bold">
+                                                <i class="bi bi-check-lg me-1"></i> Enroll in Training
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+
+                            {% elif session_role == 'admin' %}
+                                <a href="{{ url_for('training.participants', training_id=t._id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-people me-1"></i> View Registered Students ({{ t.reg_count }})
+                                </a>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-light border text-primary" data-bs-toggle="modal" data-bs-target="#editTrainingModal{{ t._id }}" title="Edit Training">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('training.delete', training_id=t._id) }}" class="d-inline" onsubmit="return confirm('Delete training program {{ t.title }}?');">
+                                        <button type="submit" class="btn btn-sm btn-light border text-danger" title="Delete Training">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Edit Training Modal -->
+                                <div class="modal fade" id="editTrainingModal{{ t._id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ url_for('training.edit', training_id=t._id) }}">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold">Edit Training Program</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Training Program Title</label>
+                                                        <input type="text" class="form-control" name="title" value="{{ t.title }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Trainer / Expert Name</label>
+                                                        <input type="text" class="form-control" name="trainer_name" value="{{ t.trainer_name }}" required>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Delivery Mode</label>
+                                                            <select name="mode" class="form-select">
+                                                                <option value="Online" {% if t.mode == 'Online' %}selected{% endif %}>Online</option>
+                                                                <option value="Offline" {% if t.mode == 'Offline' %}selected{% endif %}>Offline</option>
+                                                                <option value="Hybrid" {% if t.mode == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Status</label>
+                                                            <select name="status" class="form-select">
+                                                                <option value="Upcoming" {% if t.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
+                                                                <option value="Ongoing" {% if t.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                                                                <option value="Completed" {% if t.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Start Date</label>
+                                                            <input type="date" class="form-control" name="start_date" value="{{ t.start_date }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">End Date</label>
+                                                            <input type="date" class="form-control" name="end_date" value="{{ t.end_date }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Venue / Classroom</label>
+                                                            <input type="text" class="form-control" name="venue" value="{{ t.venue }}">
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Seat Capacity</label>
+                                                            <input type="number" class="form-control" name="max_seats" value="{{ t.max_seats }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Target Audience / Eligibility</label>
+                                                        <input type="text" class="form-control" name="eligibility" value="{{ t.eligibility }}">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Course Description &amp; Modules</label>
+                                                        <textarea name="description" class="form-control" rows="3">{{ t.description }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% else %}
+                                <a href="{{ url_for('auth.login', role='student') }}" class="btn btn-sm btn-outline-primary">
+                                    Login to Enroll
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-journal-x fs-1 text-muted d-block mb-3"></i>
+                <h5 class="fw-bold">No Training Sessions Found</h5>
+                <p class="text-muted">There are no training sessions under the selected status filter.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Training Modal (Admin Only) -->
+{% if session_role == 'admin' %}
+<div class="modal fade" id="createTrainingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('training.create') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus text-primary me-2"></i> Schedule New Training Program</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Program Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" required placeholder="e.g. Full Stack Python & Flask Bootcamp">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Delivery Mode</label>
+                            <select name="mode" class="form-select">
+                                <option value="Online">Online</option>
+                                <option value="Offline" selected>Offline</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trainer / Speaker Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="trainer_name" required placeholder="Lead Architect / Corporate Trainer">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Venue / Classroom Link</label>
+                            <input type="text" class="form-control" name="venue" placeholder="e.g. Lab 301 / Online Zoom">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="start_date" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">End Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="end_date" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Maximum Seat Limit</label>
+                            <input type="number" class="form-control" name="max_seats" value="60">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Target Audience / Branch Eligibility</label>
+                            <input type="text" class="form-control" name="eligibility" value="All Pre-Final & Final Year Students">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Curriculum Overview &amp; Learning Outcomes</label>
+                            <textarea name="description" class="form-control" rows="4" placeholder="Course syllabus, prerequisites, schedule timings, and certification details..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Publish Training Program</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

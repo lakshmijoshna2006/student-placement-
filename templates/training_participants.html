@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Training Participants | Placement Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2 small">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('training.index') }}">Trainings</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Enrolled Participants</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Enrolled Participants Roster</h3>
+            <p class="text-muted small mb-0">{{ training.title }} &bull; Trainer: {{ training.trainer_name }}</p>
+        </div>
+        <a href="{{ url_for('training.index') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Trainings
+        </a>
+    </div>
+
+    <!-- Overview Details Card -->
+    <div class="custom-card p-3 mb-4 bg-light">
+        <div class="row g-3 text-center text-md-start">
+            <div class="col-md-3">
+                <span class="text-muted small text-uppercase fw-bold">Training Duration</span>
+                <div class="fw-bold text-dark">{{ training.start_date }} to {{ training.end_date }}</div>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted small text-uppercase fw-bold">Delivery Mode &amp; Venue</span>
+                <div class="fw-bold text-dark">{{ training.mode }} ({{ training.venue }})</div>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted small text-uppercase fw-bold">Target Batch</span>
+                <div class="fw-bold text-dark">{{ training.eligibility }}</div>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted small text-uppercase fw-bold">Seat Utilization</span>
+                <div class="fw-bold text-primary">{{ registrations|length }} / {{ training.max_seats }} Enrolled</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants Table -->
+    <div class="custom-card">
+        <div class="custom-card-header">
+            <h5 class="custom-card-title">
+                <i class="bi bi-people-fill me-2 text-primary"></i> Registered Student Candidates ({{ registrations|length }})
+            </h5>
+            <div class="input-group input-group-sm" style="max-width: 250px;">
+                <span class="input-group-text bg-light"><i class="bi bi-funnel"></i></span>
+                <input type="text" id="tableLiveSearch" class="form-control" placeholder="Search participant...">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom table-filterable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Roll Number</th>
+                        <th>Department</th>
+                        <th>CGPA</th>
+                        <th>Registered Date</th>
+                        <th class="text-end">Resume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if registrations %}
+                        {% for reg in registrations %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ reg.student_name if reg.student_name else (reg.student.name if reg.student else 'Unknown') }}</div>
+                                    <small class="text-muted">{{ reg.student.email if reg.student else '' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ reg.student_roll if reg.student_roll else (reg.student.roll_no if reg.student else '-') }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary">{{ reg.student.department if reg.student else '-' }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ reg.student.cgpa if reg.student else '0.0' }}</strong>
+                                </td>
+                                <td>
+                                    {{ reg.registered_date.strftime('%d %b %Y, %H:%M') if reg.registered_date else 'Recent' }}
+                                </td>
+                                <td class="text-end">
+                                    {% if reg.student and reg.student.resume_filename %}
+                                        <a href="{{ url_for('student.download_resume', filename=reg.student.resume_filename) }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-secondary">No PDF</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No students have enrolled in this training program yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

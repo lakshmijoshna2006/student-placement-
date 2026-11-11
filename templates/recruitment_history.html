@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Recruitment History | {{ company.company_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Company Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-role-badge"><i class="bi bi-building me-1"></i> Corporate Recruiter</span>
+            <h6 class="text-white fw-bold mb-0 mt-2">{{ company.company_name }}</h6>
+            <small class="text-secondary">{{ company.email }}</small>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.dashboard') }}" class="sidebar-link">
+                    <i class="bi bi-speedometer2"></i> Recruiter Dashboard
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.profile') }}" class="sidebar-link">
+                    <i class="bi bi-building-gear"></i> Company Profile
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('jobs.create') }}" class="sidebar-link">
+                    <i class="bi bi-plus-circle"></i> Post Job Opening
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.applications') }}" class="sidebar-link">
+                    <i class="bi bi-people"></i> Manage Applications
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('company.history') }}" class="sidebar-link active">
+                    <i class="bi bi-clock-history"></i> Recruitment History
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('jobs.index') }}" class="sidebar-link">
+                    <i class="bi bi-briefcase"></i> View All Drives
+                </a>
+            </li>
+            <li class="sidebar-item mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-main">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1">Corporate Hiring History</h3>
+            <p class="text-muted small mb-0">Record of all candidates selected and offered positions at {{ company.company_name }}.</p>
+        </div>
+
+        <!-- Hires Table -->
+        <div class="custom-card">
+            <div class="custom-card-header">
+                <h5 class="custom-card-title">
+                    <i class="bi bi-check2-circle text-success me-2"></i> Selected Candidate Offers ({{ hires|length }})
+                </h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Candidate</th>
+                            <th>Roll Number</th>
+                            <th>Department</th>
+                            <th>Offered Designation</th>
+                            <th>CTC Package</th>
+                            <th>Offer Date</th>
+                            <th class="text-end">Resume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if hires %}
+                            {% for h in hires %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ h.student_name }}</div>
+                                        <small class="text-muted">{{ h.student.email if h.student else '' }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ h.roll_no }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary">{{ h.department }}</span>
+                                    </td>
+                                    <td class="fw-semibold text-primary">
+                                        {{ h.job_title }}
+                                    </td>
+                                    <td>
+                                        <span class="package-badge">{{ h.package }} LPA</span>
+                                    </td>
+                                    <td>
+                                        {{ h.placement_date.strftime('%d %b %Y') if h.placement_date else 'Recent' }}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if h.student and h.student.resume_filename %}
+                                            <a href="{{ url_for('student.download_resume', filename=h.student.resume_filename) }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                                            </a>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No PDF</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">No candidate hires confirmed yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

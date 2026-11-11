@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Job Opening | Placement Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="custom-card p-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <div>
+                        <h3 class="fw-bold mb-1">{{ action }} Campus Recruitment Drive</h3>
+                        <p class="text-muted small mb-0">Specify job role descriptions, compensation package, and eligibility criteria filters.</p>
+                    </div>
+                    <a href="{% if session_role == 'company' %}{{ url_for('company.dashboard') }}{% else %}{{ url_for('jobs.index') }}{% endif %}" class="btn btn-sm btn-light border">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                </div>
+
+                <form method="POST" action="{% if action == 'Create' %}{{ url_for('jobs.create') }}{% else %}{{ url_for('jobs.edit', job_id=job._id) }}{% endif %}">
+                    <div class="row g-3">
+                        <!-- Company Selection (Admin only) -->
+                        {% if session_role == 'admin' and action == 'Create' %}
+                            <div class="col-md-12">
+                                <label class="form-label">Recruiting Company <span class="text-danger">*</span></label>
+                                <select name="company_id" class="form-select" required>
+                                    <option value="">-- Choose Corporate Partner --</option>
+                                    {% for c in companies %}
+                                        <option value="{{ c._id }}">{{ c.company_name }} ({{ c.industry }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endif %}
+
+                        <!-- Job Title -->
+                        <div class="col-md-8">
+                            <label class="form-label">Job Role Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" value="{{ job.title if job else '' }}" placeholder="e.g. Software Development Engineer (L3)" required>
+                        </div>
+
+                        <!-- Job Type -->
+                        <div class="col-md-4">
+                            <label class="form-label">Job Type</label>
+                            <select name="job_type" class="form-select">
+                                <option value="Full-time" {% if job and job.job_type == 'Full-time' %}selected{% endif %}>Full-time</option>
+                                <option value="Internship" {% if job and job.job_type == 'Internship' %}selected{% endif %}>Internship</option>
+                            </select>
+                        </div>
+
+                        <!-- CTC Package -->
+                        <div class="col-md-4">
+                            <label class="form-label">Salary Package (LPA) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-cash"></i></span>
+                                <input type="number" step="0.1" min="0" class="form-control" name="salary_package" value="{{ job.salary_package if job else '8.0' }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="col-md-4">
+                            <label class="form-label">Work Location</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" class="form-control" name="location" value="{{ job.location if job else 'Bangalore / Hyderabad' }}" placeholder="City, State (or Remote)">
+                            </div>
+                        </div>
+
+                        <!-- Application Deadline -->
+                        <div class="col-md-4">
+                            <label class="form-label">Application Deadline <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="deadline" value="{{ job.deadline if job else '' }}" required>
+                        </div>
+
+                        <!-- Eligibility: Min CGPA -->
+                        <div class="col-md-4">
+                            <label class="form-label">Minimum CGPA Cutoff (0-10) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" max="10" class="form-control" name="min_cgpa" value="{{ job.min_cgpa if job else '7.00' }}" required>
+                        </div>
+
+                        <!-- Eligibility: Max Backlogs -->
+                        <div class="col-md-4">
+                            <label class="form-label">Max Allowed Backlogs</label>
+                            <input type="number" min="0" max="10" class="form-control" name="max_backlogs" value="{{ job.max_backlogs if job else '0' }}" required>
+                        </div>
+
+                        <!-- Status -->
+                        {% if action == 'Edit' %}
+                            <div class="col-md-4">
+                                <label class="form-label">Drive Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="Active" {% if job.status == 'Active' %}selected{% endif %}>Active (Accepting Applications)</option>
+                                    <option value="Closed" {% if job.status == 'Closed' %}selected{% endif %}>Closed</option>
+                                </select>
+                            </div>
+                        {% endif %}
+
+                        <!-- Eligible Departments -->
+                        <div class="col-12">
+                            <label class="form-label d-block">Eligible Engineering Departments</label>
+                            <div class="d-flex flex-wrap gap-3 p-3 bg-light rounded-3 border">
+                                {% for d in departments %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="departments" value="{{ d }}" id="dept_{{ d }}"
+                                            {% if not job or (job.departments and (d in job.departments or 'All' in job.departments)) %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="dept_{{ d }}">{{ d }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Required Skills -->
+                        <div class="col-12">
+                            <label class="form-label">Required Skills (Comma-separated)</label>
+                            <input type="text" class="form-control" name="skills_required" value="{{ job.skills_required|join(', ') if job and job.skills_required is iterable and job.skills_required is not string else (job.skills_required if job else '') }}" placeholder="e.g. Python, Algorithms, Data Structures, Cloud, Git">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label">Comprehensive Job Description &amp; Responsibilities <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control" rows="6" placeholder="Provide full role responsibilities, team overview, perks, and selection process..." required>{{ job.description if job else '' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+                        <a href="{% if session_role == 'company' %}{{ url_for('company.dashboard') }}{% else %}{{ url_for('jobs.index') }}{% endif %}" class="btn btn-light border">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-check-lg me-1"></i> Save &amp; Publish Job Drive
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

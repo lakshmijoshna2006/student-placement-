@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Student Portal | Placement & Training System{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Student Sidebar Navigation -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-role-badge"><i class="bi bi-person-badge me-1"></i> Student Candidate</span>
+            <h6 class="text-white fw-bold mb-0 mt-2">{{ student.name }}</h6>
+            <small class="text-secondary">{{ student.roll_no }} &bull; {{ student.department }}</small>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.dashboard') }}" class="sidebar-link active">
+                    <i class="bi bi-speedometer2"></i> My Dashboard
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.profile') }}" class="sidebar-link">
+                    <i class="bi bi-person-vcard"></i> Profile &amp; Resume
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('jobs.index') }}" class="sidebar-link">
+                    <i class="bi bi-briefcase"></i> Explore Job Drives
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.applications') }}" class="sidebar-link">
+                    <i class="bi bi-send-check"></i> My Applications
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('student.trainings') }}" class="sidebar-link">
+                    <i class="bi bi-journal-code"></i> My Trainings
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="{{ url_for('placements.index') }}" class="sidebar-link">
+                    <i class="bi bi-trophy"></i> Placement Records
+                </a>
+            </li>
+            <li class="sidebar-item mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Student Dashboard Main Content -->
+    <div class="dashboard-main">
+        <!-- Placement Congratulations Banner (if placed) -->
+        {% if placement_record %}
+            <div class="alert alert-success border-success p-3 rounded-4 shadow-sm mb-4 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon emerald"><i class="bi bi-award-fill fs-2"></i></div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-success">Congratulations, {{ student.name }}! You are Placed!</h5>
+                        <p class="mb-0 text-secondary small">
+                            Offer confirmed at <strong>{{ placement_record.company_name }}</strong> for the role of <strong>{{ placement_record.job_title }}</strong> with a package of <strong>{{ placement_record.package }} LPA</strong>.
+                        </p>
+                    </div>
+                </div>
+                <span class="badge bg-success fs-6 px-3 py-2">Placed &bull; {{ placement_record.package }} LPA</span>
+            </div>
+        {% endif %}
+
+        <!-- Welcome Profile Card -->
+        <div class="custom-card p-4 mb-4" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #ffffff;">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-8">
+                    <span class="badge bg-white text-primary fw-semibold px-2 py-1 mb-2">Class of {{ student.passing_year }}</span>
+                    <h3 class="fw-bold mb-1">Welcome back, {{ student.name }}!</h3>
+                    <p class="text-light small mb-3">
+                        Roll No: <strong>{{ student.roll_no }}</strong> | Department: <strong>{{ student.department }}</strong> | Cumulative CGPA: <strong>{{ student.cgpa }}</strong> | Active Backlogs: <strong>{{ student.backlogs }}</strong>
+                    </p>
+
+                    <!-- Technical Skills Chips -->
+                    <div class="d-flex flex-wrap gap-1 align-items-center">
+                        <span class="small me-2 opacity-75">Your Skills:</span>
+                        {% for skill in student.skills %}
+                            <span class="badge bg-white text-dark bg-opacity-75">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Resume Status Box -->
+                <div class="col-lg-4 text-lg-end">
+                    <div class="p-3 rounded-3 bg-white text-dark text-start shadow-sm d-inline-block w-100">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-muted fw-bold text-uppercase">Resume Status</span>
+                            {% if student.resume_filename %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Uploaded</span>
+                            {% else %}
+                                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i> Missing</span>
+                            {% endif %}
+                        </div>
+
+                        {% if student.resume_filename %}
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('student.download_resume', filename=student.resume_filename) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> View Resume
+                                </a>
+                                <a href="{{ url_for('student.profile') }}" class="btn btn-sm btn-light border" title="Update Resume">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </a>
+                            </div>
+                        {% else %}
+                            <a href="{{ url_for('student.profile') }}" class="btn btn-sm btn-danger w-100">
+                                <i class="bi bi-upload me-1"></i> Upload PDF Resume
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="stat-label">Applications</span>
+                        <div class="stat-icon blue"><i class="bi bi-send-fill"></i></div>
+                    </div>
+                    <div class="stat-value">{{ total_apps }}</div>
+                    <div class="small text-muted mt-2">Drives Applied</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="stat-label">Shortlisted</span>
+                        <div class="stat-icon purple"><i class="bi bi-star-fill"></i></div>
+                    </div>
+                    <div class="stat-value">{{ shortlisted_apps }}</div>
+                    <div class="small text-muted mt-2">Next Stage Invites</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="stat-label">Selections</span>
+                        <div class="stat-icon emerald"><i class="bi bi-trophy-fill"></i></div>
+                    </div>
+                    <div class="stat-value">{{ selected_apps }}</div>
+                    <div class="small text-muted mt-2">Job Offers Received</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="stat-label">Trainings</span>
+                        <div class="stat-icon amber"><i class="bi bi-journal-code"></i></div>
+                    </div>
+                    <div class="stat-value">{{ registered_trainings_count }}</div>
+                    <div class="small text-muted mt-2">Bootcamps Enrolled</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Jobs for This Student -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header">
+                <h5 class="custom-card-title">
+                    <i class="bi bi-patch-check-fill me-2 text-primary"></i> Recommended Drives (Eligible for You)
+                </h5>
+                <a href="{{ url_for('jobs.index') }}" class="btn btn-sm btn-outline-primary">
+                    Browse All Openings <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            
+            <div class="p-4">
+                <div class="row g-3">
+                    {% if recommended_jobs %}
+                        {% for job in recommended_jobs %}
+                            <div class="col-lg-6">
+                                <div class="p-3 border rounded-3 bg-white shadow-sm h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <span class="badge bg-light text-dark border">{{ job.company_name }}</span>
+                                                <h6 class="fw-bold mb-0 mt-1">
+                                                    <a href="{{ url_for('jobs.details', job_id=job._id) }}" class="text-decoration-none text-dark">{{ job.title }}</a>
+                                                </h6>
+                                            </div>
+                                            <span class="package-badge">{{ job.salary_package }} LPA</span>
+                                        </div>
+
+                                        <p class="text-secondary small mb-2 text-truncate-2">
+                                            {{ job.description }}
+                                        </p>
+
+                                        <div class="small text-muted mb-3">
+                                            <i class="bi bi-check2-circle text-success me-1"></i> Requires min CGPA {{ job.min_cgpa }} &bull; Max Backlogs {{ job.max_backlogs }}
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i> You are Eligible
+                                        </span>
+                                        <a href="{{ url_for('jobs.details', job_id=job._id) }}" class="btn btn-sm btn-primary">
+                                            View &amp; Apply
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center py-4 text-muted">
+                            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                            You have applied for all currently eligible drives or no new matching drives are active.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Applications & Status -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header">
+                <h5 class="custom-card-title">
+                    <i class="bi bi-clock-history me-2 text-primary"></i> My Recent Application Submissions
+                </h5>
+                <a href="{{ url_for('student.applications') }}" class="btn btn-sm btn-outline-primary">
+                    View All Statuses <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Company &amp; Role</th>
+                            <th>Package</th>
+                            <th>Applied Date</th>
+                            <th>Current Status</th>
+                            <th>Recruiter Remarks</th>
+                            <th class="text-end">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if applications %}
+                            {% for app in applications %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ app.company.company_name if app.company else app.job.company_name }}</div>
+                                        <small class="text-muted">{{ app.job.title if app.job else 'Job Position' }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="package-badge">{{ app.job.salary_package if app.job else '-' }} LPA</span>
+                                    </td>
+                                    <td>
+                                        {{ app.applied_date.strftime('%d %b %Y') if app.applied_date else 'Recent' }}
+                                    </td>
+                                    <td>
+                                        {% if app.status == 'Selected' %}
+                                            <span class="badge-status badge-status-selected"><i class="bi bi-check-circle-fill"></i> Selected</span>
+                                        {% elif app.status == 'Shortlisted' %}
+                                            <span class="badge-status badge-status-shortlisted"><i class="bi bi-star-fill"></i> Shortlisted</span>
+                                        {% elif app.status == 'Interview Scheduled' %}
+                                            <span class="badge-status badge-status-interview"><i class="bi bi-calendar-event"></i> Interview</span>
+                                        {% elif app.status == 'Rejected' %}
+                                            <span class="badge-status badge-status-rejected"><i class="bi bi-x-circle-fill"></i> Rejected</span>
+                                        {% else %}
+                                            <span class="badge-status badge-status-applied"><i class="bi bi-send-fill"></i> Applied</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-secondary">{{ app.remarks if app.remarks else 'Under review.' }}</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('jobs.details', job_id=app.job_id) }}" class="btn btn-sm btn-light border">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    You have not applied for any placement drives yet.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Upcoming Training Sessions -->
+        <div class="custom-card">
+            <div class="custom-card-header">
+                <h5 class="custom-card-title">
+                    <i class="bi bi-mortarboard-fill me-2 text-primary"></i> Pre-Placement Training Sessions
+                </h5>
+                <a href="{{ url_for('student.trainings') }}" class="btn btn-sm btn-outline-primary">
+                    View Full Schedule <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="p-4">
+                <div class="row g-3">
+                    {% for tr in upcoming_trainings %}
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <span class="badge bg-primary-subtle text-primary mb-2">{{ tr.mode }}</span>
+                                    <h6 class="fw-bold mb-1">{{ tr.title }}</h6>
+                                    <small class="text-muted d-block mb-2"><i class="bi bi-person-fill"></i> {{ tr.trainer_name }}</small>
+                                    <p class="text-secondary small mb-3 text-truncate-2">{{ tr.description }}</p>
+                                </div>
+                                <div class="pt-2 border-top d-flex justify-content-between align-items-center">
+                                    <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> {{ tr.start_date }}</small>
+                                    {% if tr.is_registered %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Enrolled</span>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('student.register_training', training_id=tr._id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Register</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

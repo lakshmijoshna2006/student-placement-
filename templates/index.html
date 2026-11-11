@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Student Placement & Training Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-patch-check-fill text-warning"></i> Official Campus Recruitment Portal
+                </div>
+                <h1 class="hero-title mb-4">
+                    Bridge the Gap Between <span style="color: #93c5fd;">Campus Talent</span> &amp; Global Tech Giants
+                </h1>
+                <p class="hero-subtitle mb-4">
+                    Centralized management for student profiles, resume validation, corporate recruitment drives, pre-placement skill bootcamps, and real-time application tracking powered by MongoDB &amp; Python Flask.
+                </p>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('jobs.index') }}" class="btn btn-light btn-lg px-4 fw-bold text-primary shadow-sm">
+                        <i class="bi bi-briefcase-fill me-2"></i> View Job Drives
+                    </a>
+                    {% if not session_role %}
+                        <a href="{{ url_for('auth.login', role='student') }}" class="btn btn-outline-light btn-lg px-4 fw-semibold">
+                            <i class="bi bi-person-fill me-2"></i> Student Login
+                        </a>
+                        <a href="{{ url_for('auth.register_company') }}" class="btn btn-warning btn-lg px-4 fw-bold text-dark shadow-sm">
+                            <i class="bi bi-building me-2"></i> Recruit Talent
+                        </a>
+                    {% else %}
+                        <a href="{% if session_role == 'admin' %}{{ url_for('admin.dashboard') }}{% elif session_role == 'student' %}{{ url_for('student.dashboard') }}{% else %}{{ url_for('company.dashboard') }}{% endif %}" class="btn btn-warning btn-lg px-4 fw-bold text-dark">
+                            <i class="bi bi-speedometer2 me-2"></i> Go to Dashboard
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Hero Highlights Counter Card -->
+            <div class="col-lg-5">
+                <div class="p-4 rounded-4 shadow-lg" style="background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <h5 class="fw-bold mb-4 text-white d-flex align-items-center justify-content-between">
+                        <span><i class="bi bi-graph-up-arrow me-2 text-warning"></i> Placement Highlights</span>
+                        <span class="badge bg-white text-primary">2025-2026</span>
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-sm h-100">
+                                <span class="text-muted small fw-bold text-uppercase">Highest Package</span>
+                                <h3 class="fw-extrabold text-primary mb-0 mt-1">{{ highest_pkg }} <small class="fs-6">LPA</small></h3>
+                                <small class="text-success fw-semibold"><i class="bi bi-award-fill"></i> Tier 1 Super Dream</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-sm h-100">
+                                <span class="text-muted small fw-bold text-uppercase">Average CTC</span>
+                                <h3 class="fw-extrabold text-dark mb-0 mt-1">{{ avg_pkg }} <small class="fs-6">LPA</small></h3>
+                                <small class="text-primary fw-semibold"><i class="bi bi-arrow-up-right"></i> +18% vs Last Year</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-sm h-100">
+                                <span class="text-muted small fw-bold text-uppercase">Total Placed</span>
+                                <h3 class="fw-extrabold text-success mb-0 mt-1">{{ total_placed }}</h3>
+                                <small class="text-muted">Offers Distributed</small>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 bg-white text-dark shadow-sm h-100">
+                                <span class="text-muted small fw-bold text-uppercase">Active Recruiters</span>
+                                <h3 class="fw-extrabold text-info mb-0 mt-1">{{ total_companies }}</h3>
+                                <small class="text-muted">Partner Companies</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- System Feature Highlights -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-1 mb-2">Platform Capabilities</span>
+            <h2 class="fw-bold">Enterprise-Grade Placement Architecture</h2>
+            <p class="text-secondary">Designed specifically to automate the entire lifecycle of collegiate recruitment and technical skill enablement.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon blue mb-3">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Automated Eligibility Engine</h5>
+                    <p class="text-secondary small mb-0">
+                        Evaluates candidate eligibility dynamically against job-specific criteria: CGPA benchmarks, active backlog allowances, and allowed engineering departments. Prevents duplicate and ineligible submissions.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon emerald mb-3">
+                        <i class="bi bi-building-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Recruiter Workflow Management</h5>
+                    <p class="text-secondary small mb-0">
+                        Empowers visiting corporate recruiters to create custom job descriptions, set qualification filters, review verified student academic records, download PDF resumes, and issue interview invites.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card p-4">
+                    <div class="stat-icon purple mb-3">
+                        <i class="bi bi-code-slash"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Continuous Training Programs</h5>
+                    <p class="text-secondary small mb-0">
+                        Built-in scheduling and seat management for intensive coding bootcamps, DSA mastery sessions, AWS cloud labs, and corporate mock interviews to maximize candidate placement success.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Active Drives -->
+<section class="py-5" style="background-color: var(--bg-body);">
+    <div class="container py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+            <div>
+                <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-1 mb-2">Live Opportunities</span>
+                <h2 class="fw-bold mb-0">Active Campus Recruitment Drives</h2>
+            </div>
+            <a href="{{ url_for('jobs.index') }}" class="btn btn-outline-primary fw-semibold">
+                Explore All Openings <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% if featured_jobs %}
+                {% for job in featured_jobs %}
+                    <div class="col-lg-6">
+                        <div class="job-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="badge bg-light text-dark border mb-1">{{ job.company_name }}</span>
+                                    <h5 class="fw-bold text-primary mb-1">
+                                        <a href="{{ url_for('jobs.details', job_id=job._id) }}" class="text-decoration-none text-dark">{{ job.title }}</a>
+                                    </h5>
+                                    <span class="text-muted small"><i class="bi bi-geo-alt me-1"></i> {{ job.location }} &bull; {{ job.job_type }}</span>
+                                </div>
+                                <span class="package-badge">{{ job.salary_package }} LPA</span>
+                            </div>
+
+                            <p class="text-secondary small mb-3 text-truncate-2">
+                                {{ job.description }}
+                            </p>
+
+                            <div class="mb-3">
+                                {% for s in job.skills_required[:4] %}
+                                    <span class="skill-tag">{{ s }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                <span class="small text-muted">
+                                    <i class="bi bi-mortarboard me-1"></i> Min CGPA: <strong>{{ job.min_cgpa }}</strong>
+                                </span>
+                                <a href="{{ url_for('jobs.details', job_id=job._id) }}" class="btn btn-sm btn-primary">
+                                    View Details &amp; Apply
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No active recruitment drives at this moment. Check back soon!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Top Hiring Partners Section -->
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container text-center py-3">
+        <h5 class="text-muted fw-bold text-uppercase mb-4" style="letter-spacing: 0.08em; font-size: 0.85rem;">
+            Trusted by World-Class Technology Leaders
+        </h5>
+        <div class="row row-cols-2 row-cols-md-5 g-4 align-items-center justify-content-center">
+            {% for company in partner_companies %}
+                <div class="col text-center">
+                    <div class="p-3 border rounded-3 bg-light text-secondary fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="min-height: 70px;">
+                        <i class="bi bi-building text-primary fs-5"></i>
+                        <span>{{ company.company_name }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 4-Step Placement Process Flow -->
+<section class="py-5" style="background-color: #f1f5f9;">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-1 mb-2">Roadmap to Success</span>
+            <h2 class="fw-bold">How the Placement Portal Operates</h2>
+            <p class="text-secondary">A transparent 4-stage recruitment pipeline from day one of college enrollment to offer letter handover.</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <div class="stat-icon blue mx-auto mb-3">1</div>
+                    <h6 class="fw-bold mb-2">Profile &amp; Resume Setup</h6>
+                    <p class="text-muted small mb-0">Students create profiles with verified academic scores, technical skills, and upload standard PDF resumes.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <div class="stat-icon emerald mx-auto mb-3">2</div>
+                    <h6 class="fw-bold mb-2">Skill Bootcamps</h6>
+                    <p class="text-muted small mb-0">Enrolling in hands-on industry training programs on algorithms, full-stack development, and behavioral interview coaching.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <div class="stat-icon amber mx-auto mb-3">3</div>
+                    <h6 class="fw-bold mb-2">Drive Applications</h6>
+                    <p class="text-muted small mb-0">Browse company openings, verify automatic eligibility, apply with one click, and track real-time shortlisting stages.</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <div class="stat-icon purple mx-auto mb-3">4</div>
+                    <h6 class="fw-bold mb-2">Selection &amp; Placement</h6>
+                    <p class="text-muted small mb-0">Recruiters shortlist, schedule interviews, and select candidates. Successful hires are recorded into college placement history.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5 text-white text-center" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);">
+    <div class="container py-3">
+        <h2 class="fw-bold mb-3">Ready to Launch Your Professional Career?</h2>
+        <p class="text-light mb-4" style="max-width: 600px; margin: 0 auto;">
+            Register now to access upcoming product drives, mock aptitude tests, and pre-placement training schedules.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('auth.register_student') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow">
+                Create Student Account
+            </a>
+            <a href="{{ url_for('auth.register_company') }}" class="btn btn-outline-light btn-lg px-4 fw-semibold">
+                Register as Corporate Partner
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

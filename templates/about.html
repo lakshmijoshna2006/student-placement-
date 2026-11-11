@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}About Us | Student Placement & Training Management System{% endblock %}
+
+{% block content %}
+<!-- Header Banner -->
+<div class="py-5" style="background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%); color: #ffffff;">
+    <div class="container text-center py-4">
+        <span class="badge bg-white text-primary fw-bold px-3 py-1 mb-2">Academic Year 2025-2026</span>
+        <h1 class="fw-extrabold display-5 mb-2">Training &amp; Placement Cell</h1>
+        <p class="text-light fs-5 mx-auto mb-0" style="max-width: 700px;">
+            Cultivating industry-ready engineering professionals and architecting sustainable career bridges between academia and global technology leaders.
+        </p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Director's Message & Overview -->
+    <div class="row g-5 align-items-center mb-5">
+        <div class="col-lg-5">
+            <div class="p-4 rounded-4 shadow-sm text-center bg-white border">
+                <div class="mb-3 mx-auto rounded-circle d-flex align-items-center justify-content-center bg-primary text-white" style="width: 110px; height: 110px; font-size: 3rem;">
+                    <i class="bi bi-person-workspace"></i>
+                </div>
+                <h4 class="fw-bold mb-1">Dr. K. S. Sharma</h4>
+                <p class="text-primary fw-semibold small mb-2">Director - Training &amp; Placement</p>
+                <p class="text-muted small mb-3">Ph.D. (Computer Science), Former Principal Consultant at TCS Global Labs</p>
+                <div class="p-3 bg-light rounded-3 text-start small text-secondary">
+                    <em>"Our goal extends beyond securing job offers; we are dedicated to molding innovators, critical thinkers, and ethical engineers capable of leading global digital disruption."</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <h3 class="fw-bold mb-3 text-primary">From the Placement Director's Desk</h3>
+            <p class="text-secondary">
+                Welcome to the official centralized Training and Placement Portal. The Department of Training &amp; Placement works tirelessly year-round to interface with elite multinational enterprises, Fortune 500 organizations, agile technology unicorns, and premier research labs.
+            </p>
+            <p class="text-secondary">
+                Our pedagogical approach integrates rigorous continuous aptitude evaluation, coding bootcamps in Python, MERN, Cloud Technologies, and intensive behavioral interview coaching. We believe in total transparency: our student evaluation engine validates CGPA and backlog statuses directly through MongoDB collections, guaranteeing verified records to our recruiting partners.
+            </p>
+
+            <div class="row g-3 mt-2">
+                <div class="col-sm-6">
+                    <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 border">
+                        <i class="bi bi-shield-check text-success fs-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0">100% Verified Profiles</h6>
+                            <small class="text-muted">Rigorous academic vetting</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 border">
+                        <i class="bi bi-trophy-fill text-warning fs-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0">Tier-1 Dream Offers</h6>
+                            <small class="text-muted">Packages up to {{ highest_pkg }} LPA</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vision & Mission Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="custom-card p-4 h-100 border-start border-4 border-primary">
+                <h4 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-eye-fill"></i> Our Vision
+                </h4>
+                <p class="text-secondary mb-0">
+                    To be recognized nationally as a benchmark collegiate placement cell that equips every aspiring engineer with high-demand multidisciplinary skill sets, ethical corporate awareness, and premier career opportunities across multinational corporate ecosystems.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="custom-card p-4 h-100 border-start border-4 border-success">
+                <h4 class="fw-bold text-success mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-bullseye"></i> Our Mission
+                </h4>
+                <ul class="text-secondary mb-0 ps-3">
+                    <li class="mb-2">Deliver continuous algorithmic, full-stack, and cloud training from the pre-final year.</li>
+                    <li class="mb-2">Maintain seamless corporate partnerships with IT, core engineering, and consulting firms.</li>
+                    <li>Operate a transparent, automated recruitment portal ensuring zero bias and merit-driven selections.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campus Infrastructure -->
+    <div class="mb-5">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">World-Class Placement Infrastructure</h3>
+            <p class="text-muted">Modern facilities dedicated to hosting concurrent high-volume corporate recruitment drives.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="p-3 bg-white rounded-3 border text-center h-100">
+                    <i class="bi bi-laptop text-primary fs-1 mb-2 d-block"></i>
+                    <h6 class="fw-bold">450+ Online Testing Terminals</h6>
+                    <small class="text-muted">Gigabit LAN and UPS backup for glitch-free national level assessments.</small>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="p-3 bg-white rounded-3 border text-center h-100">
+                    <i class="bi bi-people-fill text-success fs-1 mb-2 d-block"></i>
+                    <h6 class="fw-bold">12 Corporate Interview Suites</h6>
+                    <small class="text-muted">Acoustically treated cabins equipped with video conferencing and whiteboards.</small>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="p-3 bg-white rounded-3 border text-center h-100">
+                    <i class="bi bi-mic-fill text-warning fs-1 mb-2 d-block"></i>
+                    <h6 class="fw-bold">750-Seater Auditorium</h6>
+                    <small class="text-muted">Full audio-visual projection suites for corporate Pre-Placement Talks (PPT).</small>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="p-3 bg-white rounded-3 border text-center h-100">
+                    <i class="bi bi-database-fill-lock text-info fs-1 mb-2 d-block"></i>
+                    <h6 class="fw-bold">Secure MongoDB Datacenter</h6>
+                    <small class="text-muted">Centralized digital verification for instant resume retrieval and compliance.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
